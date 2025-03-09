@@ -1,5 +1,5 @@
 {
-  "name": "@attackonryan/agent-twitter-client",
+  "name": "agent-twitter-client-with-proxy",
   "description": "A twitter client for agents",
   "keywords": [],
   "version": "0.0.18",
@@ -39,7 +39,7 @@
     "undici-types": "^7.2.0",
     "ws": "^8.18.0",
     "node-fetch": "^3.3.2",
-    "https-proxy-agent" : "^7.0.6"
+    "https-proxy-agent": "^7.0.6"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.3",

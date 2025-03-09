@@ -181,8 +181,7 @@ export class Space extends EventEmitter {
     this.isInitialized = true;
 
     // Call plugin.init(...) and onJanusReady(...) for all plugins now that we're set
-    // @ts-expect-error
-    for (const { plugin, config: pluginConfig } of this.plugins) {
+    for (const { plugin, config: pluginConfig } of this.plugins as any) {
       plugin.init?.({ space: this, pluginConfig });
       plugin.onJanusReady?.(this.janusClient);
     }
@@ -392,8 +391,7 @@ export class Space extends EventEmitter {
    * Handler for PCM from other speakers, forwarded to plugin.onAudioData
    */
   private handleAudioData(data: AudioDataWithUser) {
-    // @ts-expect-error
-    for (const { plugin } of this.plugins) {
+    for (const { plugin } of this.plugins as any) {
       plugin.onAudioData?.(data);
     }
   }
@@ -592,8 +590,7 @@ export class Space extends EventEmitter {
     }
 
     // Cleanup all plugins
-    // @ts-expect-error
-    for (const { plugin } of this.plugins) {
+    for (const { plugin } of this.plugins as any) {
       plugin.cleanup?.();
     }
     this.plugins.clear();

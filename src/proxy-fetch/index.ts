@@ -1,4 +1,4 @@
-import fetch, { Request, Response } from 'node-fetch'
+import fetch from 'node-fetch'
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
 const proxyUrl = process.env['PROXY_URL'];
@@ -11,4 +11,3 @@ export const nodeFetch = (...params: Parameters<typeof fetch>) => {
         agent: proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined
     });
 }
-export { Request, Response }
