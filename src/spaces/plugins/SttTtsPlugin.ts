@@ -8,6 +8,7 @@ import { Space } from '../core/Space';
 import { SpaceParticipant } from '../core/SpaceParticipant';
 import { JanusClient } from '../core/JanusClient';
 import { Logger } from '../logger';
+import { nodeFetch } from '../../proxy-fetch';
 
 interface PluginConfig {
   openAiApiKey?: string; // for STT & ChatGPT
@@ -341,7 +342,7 @@ export class SttTtsPlugin implements Plugin {
     formData.append('language', language);
     formData.append('temperature', '0');
 
-    const resp = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    const resp = await nodeFetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${this.openAiApiKey}` },
       body: formData,
@@ -371,7 +372,7 @@ export class SttTtsPlugin implements Plugin {
       { role: 'user', content: userText },
     ];
 
-    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+    const resp = await nodeFetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.openAiApiKey}`,
@@ -388,6 +389,7 @@ export class SttTtsPlugin implements Plugin {
     }
 
     const json = await resp.json();
+    // @ts-expect-error
     const reply = json.choices?.[0]?.message?.content || '';
     // Keep conversation context
     this.chatContext.push({ role: 'user', content: userText });
@@ -404,7 +406,7 @@ export class SttTtsPlugin implements Plugin {
     }
 
     const url = `https://api.elevenlabs.io/v1/text-to-speech/${this.voiceId}`;
-    const resp = await fetch(url, {
+    const resp = await nodeFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

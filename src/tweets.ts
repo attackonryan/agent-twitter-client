@@ -30,6 +30,7 @@ import {
   TweetV2,
   UserV2,
 } from 'twitter-api-v2';
+import { nodeFetch } from './proxy-fetch';
 
 export const defaultOptions = {
   expansions: [
@@ -383,8 +384,8 @@ export function parseTweetV2ToV1(
       end_datetime: poll.end_datetime
         ? poll.end_datetime
         : defaultTweetData?.poll?.end_datetime
-        ? defaultTweetData?.poll?.end_datetime
-        : undefined,
+          ? defaultTweetData?.poll?.end_datetime
+          : undefined,
       options: poll.options.map((option) => ({
         position: option.position,
         label: option.label,
@@ -507,9 +508,10 @@ export async function createCreateTweetRequest(
     variables.reply = { in_reply_to_tweet_id: tweetId };
   }
 
-  const response = await fetch(
+  const response = await nodeFetch(
     'https://twitter.com/i/api/graphql/a1p9RWpkYKBjWv_I3WzS-A/CreateTweet',
     {
+      // @ts-expect-error
       headers,
       body: JSON.stringify({
         variables,
@@ -558,7 +560,7 @@ export async function createCreateTweetRequest(
       method: 'POST',
     },
   );
-
+  // @ts-expect-error
   await updateCookieJar(auth.cookieJar(), response.headers);
 
   // check for errors
@@ -620,9 +622,10 @@ export async function createCreateNoteTweetRequest(
     variables.reply = { in_reply_to_tweet_id: tweetId };
   }
 
-  const response = await fetch(
+  const response = await nodeFetch(
     'https://twitter.com/i/api/graphql/0aWhJJmFlxkxv9TAUJPanA/CreateNoteTweet',
     {
+      // @ts-expect-error
       headers,
       body: JSON.stringify({
         variables,
@@ -677,7 +680,7 @@ export async function createCreateNoteTweetRequest(
       method: 'POST',
     },
   );
-
+  // @ts-expect-error
   await updateCookieJar(auth.cookieJar(), response.headers);
 
   // Check for errors and log the error response
@@ -1052,18 +1055,19 @@ async function uploadMedia(
     const form = new FormData();
     form.append('media', new Blob([mediaData]));
 
-    const response = await fetch(uploadUrl, {
+    const response = await nodeFetch(uploadUrl, {
       method: 'POST',
+      // @ts-expect-error
       headers,
       body: form,
     });
-
+    // @ts-expect-error
     await updateCookieJar(auth.cookieJar(), response.headers);
 
     if (!response.ok) {
       throw new Error(await response.text());
     }
-
+    // @ts-expect-error
     const data: MediaUploadResponse = await response.json();
     return data.media_id_string;
   }
@@ -1079,8 +1083,9 @@ async function uploadMedia(
     initParams.append('media_type', mediaType);
     initParams.append('total_bytes', mediaData.length.toString());
 
-    const initResponse = await fetch(uploadUrl, {
+    const initResponse = await nodeFetch(uploadUrl, {
       method: 'POST',
+      // @ts-expect-error
       headers,
       body: initParams,
     });
@@ -1090,6 +1095,7 @@ async function uploadMedia(
     }
 
     const initData = await initResponse.json();
+    // @ts-expect-error
     const mediaId = initData.media_id_string;
 
     // Append upload in chunks
@@ -1104,8 +1110,9 @@ async function uploadMedia(
       appendForm.append('segment_index', segmentIndex.toString());
       appendForm.append('media', new Blob([chunk]));
 
-      const appendResponse = await fetch(uploadUrl, {
+      const appendResponse = await nodeFetch(uploadUrl, {
         method: 'POST',
+        // @ts-expect-error
         headers,
         body: appendForm,
       });
@@ -1122,8 +1129,9 @@ async function uploadMedia(
     finalizeParams.append('command', 'FINALIZE');
     finalizeParams.append('media_id', mediaId);
 
-    const finalizeResponse = await fetch(uploadUrl, {
+    const finalizeResponse = await nodeFetch(uploadUrl, {
       method: 'POST',
+      // @ts-expect-error
       headers,
       body: finalizeParams,
     });
@@ -1135,6 +1143,7 @@ async function uploadMedia(
     const finalizeData = await finalizeResponse.json();
 
     // Check processing status for videos
+    // @ts-expect-error
     if (finalizeData.processing_info) {
       await checkUploadStatus(mediaId);
     }
@@ -1152,10 +1161,11 @@ async function uploadMedia(
       statusParams.append('command', 'STATUS');
       statusParams.append('media_id', mediaId);
 
-      const statusResponse = await fetch(
+      const statusResponse = await nodeFetch(
         `${uploadUrl}?${statusParams.toString()}`,
         {
           method: 'GET',
+          // @ts-expect-error
           headers,
         },
       );
@@ -1165,6 +1175,7 @@ async function uploadMedia(
       }
 
       const statusData = await statusResponse.json();
+      // @ts-expect-error
       const state = statusData.processing_info.state;
 
       if (state === 'succeeded') {
@@ -1228,9 +1239,10 @@ export async function createQuoteTweetRequest(
   }
 
   // Send the GraphQL request to create a quote tweet
-  const response = await fetch(
+  const response = await nodeFetch(
     'https://twitter.com/i/api/graphql/a1p9RWpkYKBjWv_I3WzS-A/CreateTweet',
     {
+      // @ts-expect-error
       headers,
       body: JSON.stringify({
         variables,
@@ -1281,6 +1293,7 @@ export async function createQuoteTweetRequest(
   );
 
   // Update the cookie jar with any new cookies from the response
+  // @ts-expect-error
   await updateCookieJar(auth.cookieJar(), response.headers);
 
   // Check for errors in the response
@@ -1326,13 +1339,15 @@ export async function likeTweet(
   };
 
   // Send the POST request to like the tweet
-  const response = await fetch(likeTweetUrl, {
+  const response = await nodeFetch(likeTweetUrl, {
     method: 'POST',
+    // @ts-expect-error
     headers,
     body: JSON.stringify(payload),
   });
 
   // Update the cookie jar with any new cookies from the response
+  // @ts-expect-error
   await updateCookieJar(auth.cookieJar(), response.headers);
 
   // Check for errors in the response
@@ -1377,13 +1392,15 @@ export async function retweet(
   };
 
   // Send the POST request to retweet the tweet
-  const response = await fetch(retweetUrl, {
+  const response = await nodeFetch(retweetUrl, {
     method: 'POST',
+    // @ts-expect-error
     headers,
     body: JSON.stringify(payload),
   });
 
   // Update the cookie jar with any new cookies from the response
+  // @ts-expect-error
   await updateCookieJar(auth.cookieJar(), response.headers);
 
   // Check for errors in the response
@@ -1476,7 +1493,8 @@ export async function createCreateLongTweetRequest(
     responsive_web_enhance_cards_enabled: false,
   };
 
-  const response = await fetch(url, {
+  const response = await nodeFetch(url, {
+    // @ts-expect-error
     headers,
     body: JSON.stringify({
       variables,
@@ -1485,7 +1503,7 @@ export async function createCreateLongTweetRequest(
     }),
     method: 'POST',
   });
-
+  // @ts-expect-error
   await updateCookieJar(auth.cookieJar(), response.headers);
 
   // check for errors
@@ -1527,17 +1545,17 @@ export async function getArticle(
  * All comments must remain in English.
  */
 export async function fetchRetweetersPage(
-    tweetId: string,
-    auth: TwitterAuth,
-    cursor?: string,
-    count = 40,
+  tweetId: string,
+  auth: TwitterAuth,
+  cursor?: string,
+  count = 40,
 ): Promise<{
   retweeters: Retweeter[];
   bottomCursor?: string;
   topCursor?: string;
 }> {
   const baseUrl =
-      'https://twitter.com/i/api/graphql/VSnHXwLGADxxtetlPnO7xg/Retweeters';
+    'https://twitter.com/i/api/graphql/VSnHXwLGADxxtetlPnO7xg/Retweeters';
 
   // Build query parameters
   const variables = {
@@ -1598,12 +1616,14 @@ export async function fetchRetweetersPage(
     'x-csrf-token': xCsrfToken?.value || '',
   });
 
-  const response = await fetch(url.toString(), {
+  const response = await nodeFetch(url.toString(), {
     method: 'GET',
+    // @ts-expect-error
     headers,
   });
 
   // Update cookies if needed
+  // @ts-expect-error
   await updateCookieJar(auth.cookieJar(), response.headers);
 
   if (!response.ok) {
@@ -1612,7 +1632,8 @@ export async function fetchRetweetersPage(
 
   const json = await response.json();
   const instructions =
-      json?.data?.retweeters_timeline?.timeline?.instructions || [];
+    // @ts-expect-error
+    json?.data?.retweeters_timeline?.timeline?.instructions || [];
 
   const retweeters: Retweeter[] = [];
   let bottomCursor: string | undefined;
@@ -1637,16 +1658,16 @@ export async function fetchRetweetersPage(
 
         // Capture the bottom cursor
         if (
-            entry.content?.entryType === 'TimelineTimelineCursor' &&
-            entry.content?.cursorType === 'Bottom'
+          entry.content?.entryType === 'TimelineTimelineCursor' &&
+          entry.content?.cursorType === 'Bottom'
         ) {
           bottomCursor = entry.content.value;
         }
 
         // Capture the top cursor
         if (
-            entry.content?.entryType === 'TimelineTimelineCursor' &&
-            entry.content?.cursorType === 'Top'
+          entry.content?.entryType === 'TimelineTimelineCursor' &&
+          entry.content?.cursorType === 'Top'
         ) {
           topCursor = entry.content.value;
         }
@@ -1664,8 +1685,8 @@ export async function fetchRetweetersPage(
  * @returns A list of all users that retweeted the tweet.
  */
 export async function getAllRetweeters(
-    tweetId: string,
-    auth: TwitterAuth
+  tweetId: string,
+  auth: TwitterAuth
 ): Promise<Retweeter[]> {
   let allRetweeters: Retweeter[] = [];
   let cursor: string | undefined;
@@ -1673,10 +1694,10 @@ export async function getAllRetweeters(
   while (true) {
     // Destructure bottomCursor / topCursor
     const { retweeters, bottomCursor, topCursor } = await fetchRetweetersPage(
-        tweetId,
-        auth,
-        cursor,
-        40
+      tweetId,
+      auth,
+      cursor,
+      40
     );
     allRetweeters = allRetweeters.concat(retweeters);
 

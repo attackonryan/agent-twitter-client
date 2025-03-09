@@ -4,6 +4,7 @@ import { Headers } from 'headers-polyfill';
 import { FetchTransformOptions } from './api';
 import { TwitterApi } from 'twitter-api-v2';
 import { Profile } from './profile';
+import { nodeFetch } from './proxy-fetch';
 
 export interface TwitterAuthOptions {
   fetch: typeof fetch;
@@ -124,7 +125,8 @@ export class TwitterGuestAuth implements TwitterAuth {
     bearerToken: string,
     protected readonly options?: Partial<TwitterAuthOptions>,
   ) {
-    this.fetch = withTransform(options?.fetch ?? fetch, options?.transform);
+    // @ts-expect-error
+    this.fetch = withTransform(options?.fetch ?? nodeFetch, options?.transform);
     this.bearerToken = bearerToken;
     this.jar = new CookieJar();
     this.v2Client = null;

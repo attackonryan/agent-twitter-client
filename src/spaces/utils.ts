@@ -5,6 +5,7 @@ import type { BroadcastCreated, TurnServersInfo } from './types';
 import { ChatClient } from './core/ChatClient';
 import { Logger } from './logger';
 import { EventEmitter } from 'events';
+import { nodeFetch } from '../proxy-fetch';
 
 /**
  * Authorizes a token for guest access, using the provided Periscope cookie.
@@ -19,7 +20,7 @@ export async function authorizeToken(cookie: string): Promise<string> {
     'X-Attempt': '1',
   });
 
-  const resp = await fetch('https://proxsee.pscp.tv/api/v2/authorizeToken', {
+  const resp = await nodeFetch('https://proxsee.pscp.tv/api/v2/authorizeToken', {
     method: 'POST',
     headers,
     body: JSON.stringify({
@@ -64,7 +65,7 @@ export async function publishBroadcast(params: {
     'X-Attempt': '1',
   });
 
-  await fetch('https://proxsee.pscp.tv/api/v2/publishBroadcast', {
+  await nodeFetch('https://proxsee.pscp.tv/api/v2/publishBroadcast', {
     method: 'POST',
     headers,
     body: JSON.stringify({
@@ -93,7 +94,7 @@ export async function getTurnServers(cookie: string): Promise<TurnServersInfo> {
     'X-Attempt': '1',
   });
 
-  const resp = await fetch('https://proxsee.pscp.tv/api/v2/turnServers', {
+  const resp = await nodeFetch('https://proxsee.pscp.tv/api/v2/turnServers', {
     method: 'POST',
     headers,
     body: JSON.stringify({ cookie }),
@@ -103,6 +104,7 @@ export async function getTurnServers(cookie: string): Promise<TurnServersInfo> {
       `getTurnServers => request failed with status ${resp.status}`,
     );
   }
+  // @ts-expect-error
   return resp.json();
 }
 
@@ -110,7 +112,7 @@ export async function getTurnServers(cookie: string): Promise<TurnServersInfo> {
  * Obtains the region from signer.pscp.tv, typically used when creating a broadcast.
  */
 export async function getRegion(): Promise<string> {
-  const resp = await fetch('https://signer.pscp.tv/region', {
+  const resp = await nodeFetch('https://signer.pscp.tv/region', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -144,7 +146,7 @@ export async function createBroadcast(params: {
     'X-Attempt': '1',
   });
 
-  const resp = await fetch('https://proxsee.pscp.tv/api/v2/createBroadcast', {
+  const resp = await nodeFetch('https://proxsee.pscp.tv/api/v2/createBroadcast', {
     method: 'POST',
     headers,
     body: JSON.stringify({
@@ -193,7 +195,7 @@ export async function accessChat(
     cookie,
   };
 
-  const resp = await fetch(url, {
+  const resp = await nodeFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -223,7 +225,7 @@ export async function startWatching(
     cookie,
   };
 
-  const resp = await fetch(url, {
+  const resp = await nodeFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -235,6 +237,7 @@ export async function startWatching(
   }
   const json = await resp.json();
   // Typically returns { session: "...someToken..." }
+  // @ts-expect-error
   return json.session;
 }
 
@@ -252,7 +255,7 @@ export async function stopWatching(
   });
 
   const body = { session, cookie };
-  const resp = await fetch(url, {
+  const resp = await nodeFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -291,7 +294,7 @@ export async function joinAudioSpace(params: {
     Authorization: params.authToken,
   });
 
-  const resp = await fetch(url, {
+  const resp = await nodeFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -328,7 +331,7 @@ export async function submitSpeakerRequest(params: {
     chat_token: params.chatToken,
   };
 
-  const resp = await fetch(url, {
+  const resp = await nodeFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -338,6 +341,7 @@ export async function submitSpeakerRequest(params: {
       `submitSpeakerRequest => request failed with status ${resp.status}`,
     );
   }
+  // @ts-expect-error
   return resp.json();
 }
 
@@ -365,7 +369,7 @@ export async function cancelSpeakerRequest(params: {
     chat_token: params.chatToken,
   };
 
-  const resp = await fetch(url, {
+  const resp = await nodeFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -376,6 +380,7 @@ export async function cancelSpeakerRequest(params: {
     );
   }
   // Typically returns { "success": true }
+  // @ts-expect-error
   return resp.json();
 }
 
@@ -399,7 +404,7 @@ export async function negotiateGuestStream(params: {
     session_uuid: params.sessionUUID,
   };
 
-  const resp = await fetch(url, {
+  const resp = await nodeFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -409,6 +414,7 @@ export async function negotiateGuestStream(params: {
       `negotiateGuestStream => request failed with status ${resp.status}`,
     );
   }
+  // @ts-expect-error
   return resp.json();
 }
 
@@ -438,7 +444,7 @@ export async function muteSpeaker(params: {
     Authorization: params.authToken,
   });
 
-  const resp = await fetch(url, {
+  const resp = await nodeFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -475,7 +481,7 @@ export async function unmuteSpeaker(params: {
     Authorization: params.authToken,
   });
 
-  const resp = await fetch(url, {
+  const resp = await nodeFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),

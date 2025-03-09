@@ -22,6 +22,7 @@ import type {
 } from '../types';
 import { Scraper } from '../../scraper';
 import { Logger } from '../logger';
+import { nodeFetch } from '../../proxy-fetch';
 
 export interface SpaceConfig {
   mode: 'BROADCAST' | 'LISTEN' | 'INTERACTIVE';
@@ -180,6 +181,7 @@ export class Space extends EventEmitter {
     this.isInitialized = true;
 
     // Call plugin.init(...) and onJanusReady(...) for all plugins now that we're set
+    // @ts-expect-error
     for (const { plugin, config: pluginConfig } of this.plugins) {
       plugin.init?.({ space: this, pluginConfig });
       plugin.onJanusReady?.(this.janusClient);
@@ -255,7 +257,7 @@ export class Space extends EventEmitter {
 
     this.logger.debug('[Space] Approving speaker =>', endpoint, body);
 
-    const resp = await fetch(endpoint, {
+    const resp = await nodeFetch(endpoint, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
@@ -362,7 +364,7 @@ export class Space extends EventEmitter {
 
     this.logger.debug('[Space] Removing speaker =>', endpoint, body);
 
-    const resp = await fetch(endpoint, {
+    const resp = await nodeFetch(endpoint, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
@@ -390,6 +392,7 @@ export class Space extends EventEmitter {
    * Handler for PCM from other speakers, forwarded to plugin.onAudioData
    */
   private handleAudioData(data: AudioDataWithUser) {
+    // @ts-expect-error
     for (const { plugin } of this.plugins) {
       plugin.onAudioData?.(data);
     }
@@ -454,7 +457,7 @@ export class Space extends EventEmitter {
 
     this.logger.debug('[Space] endAudiospace =>', body);
 
-    const resp = await fetch(url, {
+    const resp = await nodeFetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
@@ -589,6 +592,7 @@ export class Space extends EventEmitter {
     }
 
     // Cleanup all plugins
+    // @ts-expect-error
     for (const { plugin } of this.plugins) {
       plugin.cleanup?.();
     }

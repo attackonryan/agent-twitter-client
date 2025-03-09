@@ -2,6 +2,7 @@ import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
 import { Plugin, OccupancyUpdate } from '../types';
 import { Space } from '../core/Space';
 import { Logger } from '../logger';
+import { nodeFetch } from '../../proxy-fetch';
 
 /**
  * HlsRecordPlugin
@@ -149,7 +150,7 @@ export class HlsRecordPlugin implements Plugin {
     let attempt = 0;
     while (attempt < maxRetries) {
       try {
-        const resp = await fetch(hlsUrl, { method: 'HEAD' });
+        const resp = await nodeFetch(hlsUrl, { method: 'HEAD' });
         if (resp.ok) {
           this.logger?.debug(
             `[HlsRecordPlugin] HLS is ready (attempt #${attempt + 1})`,

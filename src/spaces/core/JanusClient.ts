@@ -6,6 +6,7 @@ const { RTCPeerConnection, MediaStream } = wrtc;
 import { JanusAudioSink, JanusAudioSource } from './JanusAudio';
 import type { AudioDataWithUser, TurnServersInfo } from '../types';
 import { Logger } from '../logger';
+import { nodeFetch } from '../../proxy-fetch';
 
 interface JanusConfig {
   /**
@@ -419,7 +420,7 @@ export class JanusClient extends EventEmitter {
    */
   private async createSession(): Promise<number> {
     const transaction = this.randomTid();
-    const resp = await fetch(this.config.webrtcUrl, {
+    const resp = await nodeFetch(this.config.webrtcUrl, {
       method: 'POST',
       headers: {
         Authorization: this.config.credential,
@@ -435,9 +436,11 @@ export class JanusClient extends EventEmitter {
       throw new Error('[JanusClient] createSession failed');
     }
     const json = await resp.json();
+    // @ts-expect-error
     if (json.janus !== 'success') {
       throw new Error('[JanusClient] createSession invalid response');
     }
+    // @ts-expect-error
     return json.data.id;
   }
 
@@ -449,7 +452,7 @@ export class JanusClient extends EventEmitter {
       throw new Error('[JanusClient] attachPlugin => no sessionId');
     }
     const transaction = this.randomTid();
-    const resp = await fetch(`${this.config.webrtcUrl}/${this.sessionId}`, {
+    const resp = await nodeFetch(`${this.config.webrtcUrl}/${this.sessionId}`, {
       method: 'POST',
       headers: {
         Authorization: this.config.credential,
@@ -465,9 +468,11 @@ export class JanusClient extends EventEmitter {
       throw new Error('[JanusClient] attachPlugin failed');
     }
     const json = await resp.json();
+    // @ts-expect-error
     if (json.janus !== 'success') {
       throw new Error('[JanusClient] attachPlugin invalid response');
     }
+    // @ts-expect-error
     return json.data.id;
   }
 
@@ -491,7 +496,7 @@ export class JanusClient extends EventEmitter {
       h264_profile: '42e01f',
       dummy_publisher: false,
     };
-    const resp = await fetch(
+    const resp = await nodeFetch(
       `${this.config.webrtcUrl}/${this.sessionId}/${this.handleId}`,
       {
         method: 'POST',
@@ -513,11 +518,14 @@ export class JanusClient extends EventEmitter {
     const json = await resp.json();
     this.logger.debug('[JanusClient] createRoom =>', JSON.stringify(json));
 
+    // @ts-expect-error
     if (json.janus === 'error') {
       throw new Error(
+        // @ts-expect-error
         `[JanusClient] createRoom error => ${json.error?.reason || 'Unknown'}`,
       );
     }
+    // @ts-expect-error
     if (json.plugindata?.data?.videoroom !== 'created') {
       throw new Error(
         `[JanusClient] unexpected createRoom response => ${JSON.stringify(
@@ -609,7 +617,7 @@ export class JanusClient extends EventEmitter {
       throw new Error('[JanusClient] No session for sendJanusMessage');
     }
     const transaction = this.randomTid();
-    const resp = await fetch(
+    const resp = await nodeFetch(
       `${this.config.webrtcUrl}/${this.sessionId}/${handleId}`,
       {
         method: 'POST',
@@ -643,10 +651,9 @@ export class JanusClient extends EventEmitter {
         return;
       }
       try {
-        const url = `${this.config.webrtcUrl}/${
-          this.sessionId
-        }?maxev=1&_=${Date.now()}`;
-        const resp = await fetch(url, {
+        const url = `${this.config.webrtcUrl}/${this.sessionId
+          }?maxev=1&_=${Date.now()}`;
+        const resp = await nodeFetch(url, {
           headers: { Authorization: this.config.credential },
         });
         if (resp.ok) {
@@ -792,7 +799,7 @@ export class JanusClient extends EventEmitter {
     };
     this.logger.info('[JanusClient] destroying room =>', body);
 
-    const resp = await fetch(
+    const resp = await nodeFetch(
       `${this.config.webrtcUrl}/${this.sessionId}/${this.handleId}`,
       {
         method: 'POST',
@@ -831,7 +838,7 @@ export class JanusClient extends EventEmitter {
     };
     this.logger.info('[JanusClient] leaving room =>', body);
 
-    const resp = await fetch(
+    const resp = await nodeFetch(
       `${this.config.webrtcUrl}/${this.sessionId}/${this.handleId}`,
       {
         method: 'POST',

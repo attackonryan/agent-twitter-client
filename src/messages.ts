@@ -1,4 +1,5 @@
 import { TwitterAuth } from './auth';
+import { nodeFetch } from './proxy-fetch';
 import { updateCookieJar } from './requests';
 
 export interface DirectMessage {
@@ -240,9 +241,8 @@ export async function getDirectMessageConversations(
     params.append('cursor', cursor);
   }
 
-  const finalUrl = `${messageListUrl}${
-    params.toString() ? '?' + params.toString() : ''
-  }`;
+  const finalUrl = `${messageListUrl}${params.toString() ? '?' + params.toString() : ''
+    }`;
   const cookies = await auth.cookieJar().getCookies(url);
   const xCsrfToken = cookies.find((cookie) => cookie.key === 'ct0');
 
@@ -258,11 +258,12 @@ export async function getDirectMessageConversations(
     'x-csrf-token': xCsrfToken?.value as string,
   });
 
-  const response = await fetch(finalUrl, {
+  const response = await nodeFetch(finalUrl, {
     method: 'GET',
+    // @ts-expect-error
     headers,
   });
-
+  // @ts-expect-error
   await updateCookieJar(auth.cookieJar(), response.headers);
 
   if (!response.ok) {
@@ -312,17 +313,17 @@ export async function sendDirectMessage(
     dm_users: false,
   };
 
-  const response = await fetch(messageDmUrl, {
-    method: 'POST',
+  const response = await nodeFetch(messageDmUrl, {
+    method: 'POST',    // @ts-expect-error
     headers,
     body: JSON.stringify(payload),
   });
-
+  // @ts-expect-error
   await updateCookieJar(auth.cookieJar(), response.headers);
 
   if (!response.ok) {
     throw new Error(await response.text());
   }
-
+  // @ts-expect-error
   return await response.json();
 }
